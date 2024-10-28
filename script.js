@@ -220,6 +220,46 @@ function getCityCoordinates() {
     })
     .catch(() => alert(`Failed to fetch coordinates for ${cityName}`));
 }
+ document.getElementById('locationBtn').onclick = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        };
 
+        function showPosition(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            // Fetch the location name using the Nominatim API
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
+                .then(response => response.json())
+                .then(data => {
+                    const locationName = data.display_name || "Location not found";
+                    document.getElementById('city_input').value = locationName; // Set the input value
+                })
+                .catch(error => {
+                    alert("Error fetching location name.");
+                    console.error(error);
+                });
+        }
+
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
+        }
 // Event Listener for Search Button
 searchBtn.addEventListener('click', getCityCoordinates);
